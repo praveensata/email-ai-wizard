@@ -1,4 +1,3 @@
-
 import { db } from '@/lib/firebase';
 import { 
   collection, 
@@ -53,10 +52,17 @@ export const getCampaigns = async (userId: string) => {
     const q = query(collection(db, 'campaigns'), where('userId', '==', userId));
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      // Convert Firestore Timestamp to JavaScript Date
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : null,
+        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : null,
+        scheduledDate: data.scheduledDate?.toDate ? data.scheduledDate.toDate() : null,
+      };
+    });
   } catch (error) {
     console.error('Error getting campaigns:', error);
     throw error;
@@ -70,9 +76,14 @@ export const getCampaign = async (campaignId: string) => {
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
+      const data = docSnap.data();
+      // Convert Firestore Timestamp to JavaScript Date
       return {
         id: docSnap.id,
-        ...docSnap.data()
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : null,
+        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : null,
+        scheduledDate: data.scheduledDate?.toDate ? data.scheduledDate.toDate() : null,
       };
     } else {
       throw new Error('Campaign not found');

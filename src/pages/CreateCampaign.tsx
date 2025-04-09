@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -176,7 +175,13 @@ const CreateCampaign = () => {
     setSubmitLoading(true);
 
     try {
-      const { productDetails, campaignGoal, ...campaignData } = values;
+      const campaignData = {
+        name: values.name,
+        subject: values.subject,
+        content: values.content,
+        customerSegment: values.customerSegment,
+        scheduledDate: values.scheduledDate
+      };
       
       const campaignId = await addCampaign(currentUser.uid, campaignData);
       
