@@ -5,6 +5,9 @@ interface GeminiResponse {
   error?: string;
 }
 
+// Default Gemini API key
+const DEFAULT_GEMINI_API_KEY = 'AIzaSyAozEoYBnZO3AXf4R30WjNN1ClF0F6MwP4';
+
 // Validate Gemini API key format
 const isValidGeminiApiKey = (apiKey: string): boolean => {
   // Basic validation - Gemini API keys typically start with "AI" and are reasonably long
@@ -13,14 +16,17 @@ const isValidGeminiApiKey = (apiKey: string): boolean => {
 
 // Service to interact with Gemini API
 export const generateEmailContent = async (
-  apiKey: string, 
+  apiKey: string = DEFAULT_GEMINI_API_KEY, 
   productDetails: string, 
   customerSegment: string, 
   campaignGoal: string
 ): Promise<GeminiResponse> => {
   try {
-    // Validate API key format first
-    if (!apiKey || !isValidGeminiApiKey(apiKey)) {
+    // If no API key is provided, use the default one
+    const keyToUse = apiKey || DEFAULT_GEMINI_API_KEY;
+    
+    // Validate API key format
+    if (!isValidGeminiApiKey(keyToUse)) {
       return { 
         success: false, 
         error: 'Invalid API key format. Please provide a valid Gemini API key.' 
@@ -51,7 +57,7 @@ export const generateEmailContent = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${keyToUse}`
       },
       body: JSON.stringify({
         contents: [{

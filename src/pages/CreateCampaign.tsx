@@ -10,7 +10,7 @@ import { addCampaign } from '@/services/campaignService';
 import { generateEmailContent } from '@/services/geminiService';
 import { CustomerSegment, customerSegmentOptions } from '@/types/campaign';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, Send, Sparkles, Calendar as CalendarIcon, ChevronDown } from 'lucide-react';
+import { Loader2, Send, Sparkles, Calendar as CalendarIcon } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -23,7 +23,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -67,8 +66,6 @@ type CampaignFormValues = z.infer<typeof campaignSchema>;
 const CreateCampaign = () => {
   const [generatingEmail, setGeneratingEmail] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [geminiApiKey, setGeminiApiKey] = useState('');
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { currentUser } = useAuth();
@@ -102,23 +99,15 @@ const CreateCampaign = () => {
         return;
       }
 
-      if (!geminiApiKey) {
-        setShowApiKeyInput(true);
-        toast({
-          title: "Gemini API Key required",
-          description: "Please enter your Gemini API key to generate email content.",
-        });
-        return;
-      }
-
       setGeneratingEmail(true);
       
       // Get customer segment label from options
       const segmentOption = customerSegmentOptions.find(option => option.value === customerSegment);
       const segmentLabel = segmentOption ? segmentOption.label : customerSegment;
 
+      // Using the default API key now (no need to pass a key)
       const result = await generateEmailContent(
-        geminiApiKey,
+        undefined,
         productDetails,
         segmentLabel,
         campaignGoal
@@ -374,24 +363,6 @@ const CreateCampaign = () => {
                       <CardDescription>Let AI craft your email content based on your products and goals</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {showApiKeyInput && (
-                        <div className="mb-6">
-                          <FormLabel htmlFor="geminiApiKey">Gemini API Key</FormLabel>
-                          <div className="mt-1">
-                            <Input
-                              id="geminiApiKey"
-                              type="password"
-                              value={geminiApiKey}
-                              onChange={(e) => setGeminiApiKey(e.target.value)}
-                              placeholder="Enter your Gemini API key"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                              Your API key is not stored on our servers and is only used for this session.
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
                       <FormField
                         control={form.control}
                         name="productDetails"
