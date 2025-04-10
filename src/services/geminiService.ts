@@ -14,6 +14,18 @@ const isValidGeminiApiKey = (apiKey: string): boolean => {
   return apiKey && apiKey.length > 20 && apiKey.startsWith('AI');
 };
 
+// Clean HTML tags from text
+const cleanHtmlContent = (content: string): string => {
+  // Remove HTML tags
+  const cleanedContent = content
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/&nbsp;/g, ' ') // Replace &nbsp; with spaces
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .trim();
+  
+  return cleanedContent;
+};
+
 // Service to interact with Gemini API
 export const generateEmailContent = async (
   apiKey: string = DEFAULT_GEMINI_API_KEY, 
@@ -42,14 +54,16 @@ export const generateEmailContent = async (
       Campaign Goal: ${campaignGoal}
       
       The email should include:
-      - An attention-grabbing subject line
+      - An attention-grabbing subject line (prefixed with "Subject:" on its own line)
       - Professional greeting
       - Engaging introduction
       - Key product benefits
       - Clear call to action
       - Professional sign-off
       
-      Format the response as HTML that can be used directly in an email template.
+      DO NOT include any HTML tags or markdown formatting in your response.
+      Format the response as plain text that can be directly placed in an email.
+      Start with "Subject: Your Subject Line Here" on the first line.
     `;
 
     // Using the newer Gemini 2.0 Flash model with API key in URL parameter
@@ -87,7 +101,10 @@ export const generateEmailContent = async (
     }
 
     // Extract the generated text from Gemini response
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    
+    // Clean any potential HTML tags from the generated content
+    generatedText = cleanHtmlContent(generatedText);
     
     return {
       success: true,
@@ -101,4 +118,3 @@ export const generateEmailContent = async (
     };
   }
 };
-

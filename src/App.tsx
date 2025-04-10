@@ -12,6 +12,8 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import CreateCampaign from "./pages/CreateCampaign";
 import CampaignsList from "./pages/CampaignsList";
+import ViewCampaign from "./pages/ViewCampaign";
+import EditCampaign from "./pages/EditCampaign";
 import Analytics from "./pages/Analytics";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -41,6 +43,16 @@ const App = () => (
             <Route path="/campaigns/new" element={
               <ProtectedRoute>
                 <CreateCampaign />
+              </ProtectedRoute>
+            } />
+            <Route path="/campaigns/:id" element={
+              <ProtectedRoute>
+                <ViewCampaign />
+              </ProtectedRoute>
+            } />
+            <Route path="/campaigns/edit/:id" element={
+              <ProtectedRoute>
+                <EditCampaign />
               </ProtectedRoute>
             } />
             <Route path="/analytics" element={

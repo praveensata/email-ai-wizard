@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -39,7 +38,8 @@ import {
   Loader2, 
   MailPlus, 
   Search, 
-  Trash2 
+  Trash2,
+  Eye
 } from 'lucide-react';
 
 const CampaignsList = () => {
@@ -82,7 +82,6 @@ const CampaignsList = () => {
   const filterCampaigns = () => {
     let results = [...campaigns];
     
-    // Apply search filter
     if (searchTerm) {
       results = results.filter(campaign => 
         campaign.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -90,7 +89,6 @@ const CampaignsList = () => {
       );
     }
     
-    // Apply status filter
     if (statusFilter !== 'all') {
       results = results.filter(campaign => campaign.status === statusFilter);
     }
@@ -103,7 +101,6 @@ const CampaignsList = () => {
     try {
       await deleteCampaign(campaignId);
       
-      // Remove from state
       setCampaigns(prevCampaigns => prevCampaigns.filter(campaign => campaign.id !== campaignId));
       
       toast({
@@ -144,7 +141,6 @@ const CampaignsList = () => {
           </div>
         </div>
         
-        {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -171,7 +167,6 @@ const CampaignsList = () => {
           </div>
         </div>
 
-        {/* Campaigns List */}
         <Card>
           <CardHeader>
             <CardTitle>All Campaigns</CardTitle>
@@ -219,12 +214,17 @@ const CampaignsList = () => {
                         </td>
                         <td className="py-3 px-4 text-right">
                           <div className="flex justify-end space-x-2">
-                            {/* Edit button */}
-                            <Button variant="ghost" size="sm">
-                              <FileEdit className="h-4 w-4" />
-                            </Button>
+                            <Link to={`/campaigns/${campaign.id}`}>
+                              <Button variant="ghost" size="sm">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                            <Link to={`/campaigns/edit/${campaign.id}`}>
+                              <Button variant="ghost" size="sm">
+                                <FileEdit className="h-4 w-4" />
+                              </Button>
+                            </Link>
                             
-                            {/* Delete button with confirmation */}
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button variant="ghost" size="sm">

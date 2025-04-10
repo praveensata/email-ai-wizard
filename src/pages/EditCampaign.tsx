@@ -1,17 +1,17 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/components/ui/use-toast';
-import { addCampaign } from '@/services/campaignService';
+import { getCampaign, updateCampaign } from '@/services/campaignService';
 import { generateEmailContent } from '@/services/geminiService';
 import { CustomerSegment, customerSegmentOptions } from '@/types/campaign';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, Send, Sparkles, Calendar as CalendarIcon } from 'lucide-react';
+import { Loader2, Save, Sparkles, Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -58,15 +58,17 @@ const campaignSchema = z.object({
   content: z.string().min(1, 'Email content is required'),
   customerSegment: z.nativeEnum(CustomerSegment),
   scheduledDate: z.date().optional(),
-  productDetails: z.string().min(1, 'Product details are required for AI generation'),
-  campaignGoal: z.string().min(1, 'Campaign goal is required for AI generation'),
+  productDetails: z.string().optional(),
+  campaignGoal: z.string().optional(),
 });
 
 type CampaignFormValues = z.infer<typeof campaignSchema>;
 
-const CreateCampaign = () => {
+const EditCampaign = () => {
+  const { id } = useParams<{ id: string }>();
   const [generatingEmail, setGeneratingEmail] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { currentUser } = useAuth();
@@ -83,6 +85,41 @@ const CreateCampaign = () => {
       campaignGoal: '',
     },
   });
+
+  useEffect(() => {
+    const fetchCampaignData = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        const campaignData = await getCampaign(id);
+        
+        // Set form values
+        form.reset({
+          name: campaignData.name,
+          subject: campaignData.subject,
+          content: campaignData.content,
+          customerSegment: campaignData.customerSegment,
+          scheduledDate: campaignData.scheduledDate,
+          // These might not exist in older campaigns
+          productDetails: '',
+          campaignGoal: '',
+        });
+      } catch (error) {
+        console.error('Error fetching campaign:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load campaign data",
+        });
+        navigate('/campaigns');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCampaignData();
+  }, [id, form, navigate, toast]);
 
   // Generate email content using Gemini API
   const handleGenerateEmail = async () => {
@@ -106,7 +143,6 @@ const CreateCampaign = () => {
       const segmentOption = customerSegmentOptions.find(option => option.value === customerSegment);
       const segmentLabel = segmentOption ? segmentOption.label : customerSegment;
 
-      // Using the default API key now (no need to pass a key)
       const result = await generateEmailContent(
         undefined,
         productDetails,
@@ -115,7 +151,7 @@ const CreateCampaign = () => {
       );
 
       if (result.success && result.data) {
-        // Set the whole content
+        // Set the whole content directly without HTML tags
         const content = result.data;
         
         // Try to extract a subject line from the content
@@ -157,11 +193,11 @@ const CreateCampaign = () => {
 
   // Submit form handler
   const onSubmit = async (values: CampaignFormValues) => {
-    if (!currentUser?.uid) {
+    if (!currentUser?.uid || !id) {
       toast({
         variant: "destructive",
         title: "Authentication error",
-        description: "You must be logged in to create a campaign.",
+        description: "You must be logged in to update a campaign.",
       });
       return;
     }
@@ -177,32 +213,45 @@ const CreateCampaign = () => {
         scheduledDate: values.scheduledDate
       };
       
-      const campaignId = await addCampaign(currentUser.uid, campaignData);
+      await updateCampaign(id, campaignData);
       
       toast({
-        title: "Campaign created",
-        description: "Your campaign has been created successfully.",
+        title: "Campaign updated",
+        description: "Your campaign has been updated successfully.",
       });
       
       navigate('/campaigns');
     } catch (error) {
-      console.error('Error creating campaign:', error);
+      console.error('Error updating campaign:', error);
       toast({
         variant: "destructive",
-        title: "Failed to create campaign",
-        description: "There was an error creating your campaign. Please try again.",
+        title: "Failed to update campaign",
+        description: "There was an error updating your campaign. Please try again.",
       });
     } finally {
       setSubmitLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <Layout>
+        <div className="p-6 flex items-center justify-center min-h-screen">
+          <Loader2 className="h-8 w-8 text-primary animate-spin" />
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Create New Campaign</h1>
-          <p className="text-gray-600">Draft a new email marketing campaign</p>
+          <Button variant="outline" onClick={() => navigate('/campaigns')} className="mb-4">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Campaigns
+          </Button>
+          <h1 className="text-2xl font-bold">Edit Campaign</h1>
+          <p className="text-gray-600">Update your email marketing campaign</p>
         </div>
 
         <Form {...form}>
@@ -434,10 +483,10 @@ const CreateCampaign = () => {
               </Button>
               <Button type="submit" disabled={submitLoading}>
                 {submitLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {submitLoading ? 'Creating...' : (
+                {submitLoading ? 'Saving...' : (
                   <>
-                    <Send className="mr-2 h-4 w-4" />
-                    Create Campaign
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
                   </>
                 )}
               </Button>
@@ -449,4 +498,4 @@ const CreateCampaign = () => {
   );
 };
 
-export default CreateCampaign;
+export default EditCampaign;
