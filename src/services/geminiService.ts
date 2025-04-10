@@ -52,12 +52,11 @@ export const generateEmailContent = async (
       Format the response as HTML that can be used directly in an email template.
     `;
 
-    // Gemini API request
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+    // Using the newer Gemini 2.0 Flash model with API key in URL parameter
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keyToUse}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${keyToUse}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         contents: [{
@@ -102,3 +101,4 @@ export const generateEmailContent = async (
     };
   }
 };
+
