@@ -6,7 +6,7 @@ import { getStorage } from "firebase/storage";
 
 // Firebase configuration with direct values to ensure functionality
 const firebaseConfig = {
-  apiKey: "AIzaSyDm16_JOYJIh0fxWkfN2Y0Oc4DJi22LTwY",
+  apiKey: "AIzaSyAWCYesIIni93tfY_YNAlkqFj7ODdWa6JM",
   authDomain: "email-generative.firebaseapp.com",
   projectId: "email-generative",
   storageBucket: "email-generative.appspot.com",
