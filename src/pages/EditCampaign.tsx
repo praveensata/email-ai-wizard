@@ -9,7 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/components/ui/use-toast';
 import { getCampaign, updateCampaign } from '@/services/campaignService';
 import { generateEmailContent } from '@/services/geminiService';
-import { CustomerSegment, customerSegmentOptions } from '@/types/campaign';
+import { Campaign, CustomerSegment, customerSegmentOptions } from '@/types/campaign';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, Save, Sparkles, Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
 import {
@@ -92,15 +92,15 @@ const EditCampaign = () => {
       
       try {
         setLoading(true);
-        const campaignData = await getCampaign(id);
+        const campaignData = await getCampaign(id) as Campaign;
         
-        // Set form values
+        // Set form values - now explicitly typed as Campaign
         form.reset({
-          name: campaignData.name,
-          subject: campaignData.subject,
-          content: campaignData.content,
-          customerSegment: campaignData.customerSegment,
-          scheduledDate: campaignData.scheduledDate,
+          name: campaignData.name || '',
+          subject: campaignData.subject || '',
+          content: campaignData.content || '',
+          customerSegment: campaignData.customerSegment || CustomerSegment.AllCustomers,
+          scheduledDate: campaignData.scheduledDate ? new Date(campaignData.scheduledDate) : undefined,
           // These might not exist in older campaigns
           productDetails: '',
           campaignGoal: '',
