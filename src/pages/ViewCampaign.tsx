@@ -7,7 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { getCampaign } from '@/services/campaignService';
 import { Campaign } from '@/types/campaign';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Loader2, Edit } from 'lucide-react';
+import { ArrowLeft, Loader2, Edit, Mail, Share } from 'lucide-react';
 
 const ViewCampaign = () => {
   const { id } = useParams<{ id: string }>();
@@ -44,6 +44,21 @@ const ViewCampaign = () => {
     return new Date(timestamp).toLocaleDateString();
   };
 
+  const handleShare = () => {
+    // Just a simple share functionality for now
+    toast({
+      title: "Share feature",
+      description: "Email content ready to share. This feature will be fully implemented soon.",
+    });
+  };
+
+  const handleSend = () => {
+    toast({
+      title: "Send email",
+      description: "Email campaign would be sent now. This feature will be fully implemented soon.",
+    });
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -67,6 +82,15 @@ const ViewCampaign = () => {
     );
   }
 
+  // Extract the content after the subject line
+  let emailContent = campaign.content;
+  const subjectLineRegex = /Subject Line:\*\*(.*?)$/im;
+  const subjectMatch = campaign.content.match(subjectLineRegex);
+  if (subjectMatch && subjectMatch.index !== undefined) {
+    // Get everything after the subject line
+    emailContent = campaign.content.slice(subjectMatch.index + subjectMatch[0].length).trim();
+  }
+
   return (
     <Layout>
       <div className="p-6">
@@ -85,13 +109,28 @@ const ViewCampaign = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Email Details</CardTitle>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate(`/campaigns/edit/${campaign.id}`)}
-              >
-                <Edit className="h-4 w-4 mr-2" /> Edit
-              </Button>
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleShare}
+                >
+                  <Share className="h-4 w-4 mr-2" /> Share
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate(`/campaigns/edit/${campaign.id}`)}
+                >
+                  <Edit className="h-4 w-4 mr-2" /> Edit
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={handleSend}
+                >
+                  <Mail className="h-4 w-4 mr-2" /> Send
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -101,9 +140,10 @@ const ViewCampaign = () => {
               
               <div>
                 <h3 className="text-lg font-medium mb-2">Content</h3>
-                <div className="p-4 bg-gray-50 rounded-md border whitespace-pre-wrap font-mono">
-                  {campaign.content}
-                </div>
+                <div 
+                  className="p-4 bg-gray-50 rounded-md border overflow-auto max-h-[500px]" 
+                  dangerouslySetInnerHTML={{ __html: emailContent }}
+                />
               </div>
             </CardContent>
           </Card>

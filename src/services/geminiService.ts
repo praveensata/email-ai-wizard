@@ -33,7 +33,7 @@ export const generateEmailContent = async (
       };
     }
 
-    // Example prompt template for email generation
+    // Example prompt template for email generation with request for old-style formatting
     const prompt = `
       Generate a marketing email for the following:
       
@@ -42,15 +42,32 @@ export const generateEmailContent = async (
       Campaign Goal: ${campaignGoal}
       
       The email should include:
-      - A strong subject line (prefixed with "Subject Line:**" on its own line)
+      - Start with "Subject Line:**" followed by your subject line on the same line in quotes.
       - An introduction to the product
       - Key product features/benefits (with appropriate headings)
       - A clear call to action
       - Professional sign-off
       
-      Format the email with Markdown or similar formatting to highlight key sections.
-      Include appropriate line breaks between sections.
-      Start with "Subject Line:**" followed by your subject.
+      Format the email in HTML, but keep it simple with standard formatting tags.
+      Start with "Subject Line:**" followed by your subject in quotes.
+      
+      Example format:
+      Subject Line:** "Your compelling subject line here"
+      
+      <html>
+      <body>
+      <p>Dear [Customer],</p>
+      
+      <p>Introduction paragraph about the product...</p>
+      
+      <h3>Feature heading</h3>
+      <p>Feature description...</p>
+      
+      <p>Call to action...</p>
+      
+      <p>Company signature</p>
+      </body>
+      </html>
     `;
 
     // Using the newer Gemini 2.0 Flash model with API key in URL parameter
