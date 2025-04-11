@@ -7,7 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { getCampaign } from '@/services/campaignService';
 import { Campaign } from '@/types/campaign';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Edit } from 'lucide-react';
 
 const ViewCampaign = () => {
   const { id } = useParams<{ id: string }>();
@@ -83,8 +83,15 @@ const ViewCampaign = () => {
 
         <div className="grid gap-6">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Email Details</CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate(`/campaigns/edit/${campaign.id}`)}
+              >
+                <Edit className="h-4 w-4 mr-2" /> Edit
+              </Button>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -94,21 +101,12 @@ const ViewCampaign = () => {
               
               <div>
                 <h3 className="text-lg font-medium mb-2">Content</h3>
-                <div className="p-4 bg-gray-50 rounded-md border">
-                  <div dangerouslySetInnerHTML={{ __html: campaign.content }} />
+                <div className="p-4 bg-gray-50 rounded-md border whitespace-pre-wrap font-mono">
+                  {campaign.content}
                 </div>
               </div>
             </CardContent>
           </Card>
-
-          <div className="flex justify-end space-x-4">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate(`/campaigns/edit/${campaign.id}`)}
-            >
-              Edit Campaign
-            </Button>
-          </div>
         </div>
       </div>
     </Layout>

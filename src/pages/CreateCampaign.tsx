@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -119,18 +118,17 @@ const CreateCampaign = () => {
         const content = result.data;
         
         // Try to extract a subject line from the content
-        const subjectLineRegex = /subject:?\s*([^\n]+)/i;
+        const subjectLineRegex = /Subject Line:\*\*(.*?)$/im;
         const subjectMatch = content.match(subjectLineRegex);
+        
         if (subjectMatch && subjectMatch[1]) {
-          form.setValue('subject', subjectMatch[1].trim());
+          // Extract the subject and clean it
+          const extractedSubject = subjectMatch[1].trim().replace(/["']/g, '');
+          form.setValue('subject', extractedSubject);
         }
         
-        // Extract clean content without HTML tags
-        let cleanContent = content;
-        // Remove any Subject: line from the content
-        cleanContent = cleanContent.replace(/subject:.*\n/i, '');
-        
-        form.setValue('content', cleanContent);
+        // Set the content as is, preserving the formatting
+        form.setValue('content', content);
         
         toast({
           title: "Email generated successfully",
